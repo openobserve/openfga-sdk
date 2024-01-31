@@ -1,5 +1,5 @@
 [package]
-name = "openapi"
+name = "openfga-sdk"
 version = "1.0.1"
 authors = ["community@openfga.dev"]
 description = "A high performance and flexible authorization/permission engine built for developers and inspired by Google Zanzibar."
@@ -13,7 +13,7 @@ serde_json = "^1.0"
 url = "^2.2"
 uuid = { version = "^1.0", features = ["serde", "v4"] }
 reqwest = { version = "0.11", default-features = false, features = [
-  "rustls-tls",
-  "json",
-   "multipart"
+    "rustls-tls",
+    "json",
+    "multipart",
 ] }
