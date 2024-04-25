@@ -28,11 +28,11 @@ pub struct CheckRequest {
 }
 
 impl CheckRequest {
-    pub fn new(tuple_key: crate::models::CheckRequestTupleKey) -> CheckRequest {
+    pub fn new(tuple_key: crate::models::CheckRequestTupleKey, authorization_model_id: Option<String>) -> CheckRequest {
         CheckRequest {
             tuple_key: Box::new(tuple_key),
             contextual_tuples: None,
-            authorization_model_id: None,
+            authorization_model_id,
             trace: None,
             context: None,
         }
