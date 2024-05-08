@@ -10,8 +10,6 @@
 
 /// StreamedListObjectsResponse : The response for a StreamedListObjects RPC.
 
-
-
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct StreamedListObjectsResponse {
     #[serde(rename = "object")]
@@ -21,10 +19,6 @@ pub struct StreamedListObjectsResponse {
 impl StreamedListObjectsResponse {
     /// The response for a StreamedListObjects RPC.
     pub fn new(object: String) -> StreamedListObjectsResponse {
-        StreamedListObjectsResponse {
-            object,
-        }
+        StreamedListObjectsResponse { object }
     }
 }
-
-

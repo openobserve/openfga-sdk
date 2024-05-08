@@ -15,7 +15,6 @@
 pub enum NullValue {
     #[serde(rename = "NULL_VALUE")]
     NullValue,
-
 }
 
 impl ToString for NullValue {
@@ -31,7 +30,3 @@ impl Default for NullValue {
         Self::NullValue
     }
 }
-
-
-
-

@@ -10,8 +10,6 @@
 
 /// RelationReference : RelationReference represents a relation of a particular object type (e.g. 'document#viewer').
 
-
-
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct RelationReference {
     #[serde(rename = "type")]
@@ -36,5 +34,3 @@ impl RelationReference {
         }
     }
 }
-
-
