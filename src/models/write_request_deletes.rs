@@ -12,10 +12,19 @@
 pub struct WriteRequestDeletes {
     #[serde(rename = "tuple_keys")]
     pub tuple_keys: Vec<crate::models::TupleKeyWithoutCondition>,
+    #[serde(rename = "on_missing")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub on_missing: Option<String>,
 }
 
 impl WriteRequestDeletes {
-    pub fn new(tuple_keys: Vec<crate::models::TupleKeyWithoutCondition>) -> WriteRequestDeletes {
-        WriteRequestDeletes { tuple_keys }
+    pub fn new(
+        tuple_keys: Vec<crate::models::TupleKeyWithoutCondition>,
+        on_missing: Option<String>,
+    ) -> WriteRequestDeletes {
+        WriteRequestDeletes {
+            tuple_keys,
+            on_missing,
+        }
     }
 }

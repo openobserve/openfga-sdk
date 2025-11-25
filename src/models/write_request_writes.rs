@@ -12,10 +12,19 @@
 pub struct WriteRequestWrites {
     #[serde(rename = "tuple_keys")]
     pub tuple_keys: Vec<crate::models::TupleKey>,
+    #[serde(rename = "on_duplicate")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub on_duplicate: Option<String>,
 }
 
 impl WriteRequestWrites {
-    pub fn new(tuple_keys: Vec<crate::models::TupleKey>) -> WriteRequestWrites {
-        WriteRequestWrites { tuple_keys }
+    pub fn new(
+        tuple_keys: Vec<crate::models::TupleKey>,
+        on_duplicate: Option<String>,
+    ) -> WriteRequestWrites {
+        WriteRequestWrites {
+            tuple_keys,
+            on_duplicate,
+        }
     }
 }
