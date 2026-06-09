@@ -92,6 +92,33 @@ pub fn parse_deep_object(prefix: &str, value: &serde_json::Value) -> Vec<(String
     unimplemented!("Only objects are supported with style=deepObject")
 }
 
+/// Applies the authentication configured on `configuration` to an outgoing request.
+///
+/// Precedence: `bearer_access_token` > `oauth_access_token` > `api_key` > `basic_auth`.
+/// All token-based methods produce an `Authorization` header; a pre-shared key / OIDC
+/// access token is sent as `Authorization: Bearer <token>`, which is what the OpenFGA
+/// server expects for both its `preshared` and `oidc` auth methods. When no auth field is
+/// set the request is returned unchanged, preserving the unauthenticated behavior.
+pub(crate) fn apply_auth(
+    mut req_builder: reqwest::RequestBuilder,
+    configuration: &configuration::Configuration,
+) -> reqwest::RequestBuilder {
+    if let Some(ref token) = configuration.bearer_access_token {
+        req_builder = req_builder.bearer_auth(token);
+    } else if let Some(ref token) = configuration.oauth_access_token {
+        req_builder = req_builder.bearer_auth(token);
+    } else if let Some(ref api_key) = configuration.api_key {
+        let value = match api_key.prefix {
+            Some(ref prefix) => format!("{} {}", prefix, api_key.key),
+            None => api_key.key.clone(),
+        };
+        req_builder = req_builder.header(reqwest::header::AUTHORIZATION, value);
+    } else if let Some((ref username, ref password)) = configuration.basic_auth {
+        req_builder = req_builder.basic_auth(username, password.clone());
+    }
+    req_builder
+}
+
 pub mod assertions_api;
 pub mod authorization_models_api;
 pub mod relationship_queries_api;
@@ -99,3 +126,60 @@ pub mod relationship_tuples_api;
 pub mod stores_api;
 
 pub mod configuration;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::apis::configuration::{ApiKey, Configuration};
+
+    fn auth_header(configuration: &Configuration) -> Option<String> {
+        let req = apply_auth(configuration.client.get("http://localhost/stores"), configuration)
+            .build()
+            .unwrap();
+        req.headers()
+            .get(reqwest::header::AUTHORIZATION)
+            .map(|v| v.to_str().unwrap().to_owned())
+    }
+
+    #[test]
+    fn no_auth_when_all_fields_none() {
+        let cfg = Configuration::default();
+        assert_eq!(auth_header(&cfg), None);
+    }
+
+    #[test]
+    fn bearer_token_sets_authorization_header() {
+        let cfg = Configuration {
+            bearer_access_token: Some("secret-key".to_owned()),
+            ..Configuration::default()
+        };
+        assert_eq!(auth_header(&cfg), Some("Bearer secret-key".to_owned()));
+    }
+
+    #[test]
+    fn bearer_token_takes_precedence_over_other_methods() {
+        let cfg = Configuration {
+            bearer_access_token: Some("the-bearer".to_owned()),
+            oauth_access_token: Some("the-oauth".to_owned()),
+            api_key: Some(ApiKey {
+                prefix: None,
+                key: "the-key".to_owned(),
+            }),
+            basic_auth: Some(("user".to_owned(), Some("pass".to_owned()))),
+            ..Configuration::default()
+        };
+        assert_eq!(auth_header(&cfg), Some("Bearer the-bearer".to_owned()));
+    }
+
+    #[test]
+    fn api_key_with_prefix_sets_authorization_header() {
+        let cfg = Configuration {
+            api_key: Some(ApiKey {
+                prefix: Some("Bearer".to_owned()),
+                key: "the-key".to_owned(),
+            }),
+            ..Configuration::default()
+        };
+        assert_eq!(auth_header(&cfg), Some("Bearer the-key".to_owned()));
+    }
+}
