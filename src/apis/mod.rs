@@ -133,9 +133,12 @@ mod tests {
     use crate::apis::configuration::{ApiKey, Configuration};
 
     fn auth_header(configuration: &Configuration) -> Option<String> {
-        let req = apply_auth(configuration.client.get("http://localhost/stores"), configuration)
-            .build()
-            .unwrap();
+        let req = apply_auth(
+            configuration.client.get("http://localhost/stores"),
+            configuration,
+        )
+        .build()
+        .unwrap();
         req.headers()
             .get(reqwest::header::AUTHORIZATION)
             .map(|v| v.to_str().unwrap().to_owned())

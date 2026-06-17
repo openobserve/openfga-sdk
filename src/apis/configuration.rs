@@ -47,3 +47,9 @@ impl Default for Configuration {
         }
     }
 }
+
+pub fn get_openfga_client(skip_tls: bool) -> reqwest::Result<reqwest::Client> {
+    reqwest::ClientBuilder::new()
+        .danger_accept_invalid_certs(skip_tls)
+        .build()
+}
